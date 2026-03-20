@@ -1,0 +1,994 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ElectroVault — Marketplace de Vehículos Eléctricos en Blockchain</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    /* ─── RESET & VARIABLES ─────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #050810;
+      --bg2: #090d1a;
+      --surface: #0d1326;
+      --surface2: #121a35;
+      --border: rgba(0,220,180,0.12);
+      --glow: #00dcb4;
+      --glow2: #3b82f6;
+      --accent: #00dcb4;
+      --accent2: #ff6b35;
+      --text: #e8f0ff;
+      --text-muted: #5a6a8a;
+      --danger: #ff4d6d;
+      --success: #00dcb4;
+      --font-display: 'Syne', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+      --radius: 12px;
+      --transition: 0.25s cubic-bezier(0.4,0,0.2,1);
+    }
+
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: var(--font-display);
+      background: var(--bg);
+      color: var(--text);
+      overflow-x: hidden;
+      cursor: default;
+    }
+
+    /* ─── ANIMATED BACKGROUND ───────────────────────── */
+    .bg-grid {
+      position: fixed; inset: 0; z-index: 0;
+      background-image:
+        linear-gradient(rgba(0,220,180,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,220,180,0.03) 1px, transparent 1px);
+      background-size: 60px 60px;
+      pointer-events: none;
+    }
+    .bg-orb {
+      position: fixed; border-radius: 50%; filter: blur(120px);
+      pointer-events: none; z-index: 0; opacity: 0.15;
+      animation: orb-drift 20s ease-in-out infinite alternate;
+    }
+    .bg-orb-1 { width: 600px; height: 600px; background: var(--glow); top: -200px; left: -200px; }
+    .bg-orb-2 { width: 500px; height: 500px; background: var(--glow2); bottom: -150px; right: -150px; animation-delay: -10s; }
+    @keyframes orb-drift { from { transform: translate(0,0) scale(1); } to { transform: translate(60px,40px) scale(1.1); } }
+
+    /* ─── NAV ────────────────────────────────────────── */
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 40px; height: 70px;
+      background: rgba(5,8,16,0.85);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+    }
+    .logo {
+      display: flex; align-items: center; gap: 12px;
+      font-size: 1.3rem; font-weight: 800; letter-spacing: -0.02em;
+    }
+    .logo-icon {
+      width: 36px; height: 36px;
+      background: linear-gradient(135deg, var(--glow), var(--glow2));
+      border-radius: 8px; display: grid; place-items: center; font-size: 18px;
+    }
+    .logo span { color: var(--glow); }
+    .nav-links { display: flex; gap: 8px; }
+    .nav-link {
+      padding: 8px 16px; border-radius: 8px;
+      font-size: 0.875rem; font-weight: 600;
+      color: var(--text-muted); cursor: pointer;
+      transition: var(--transition); border: none; background: none;
+    }
+    .nav-link:hover, .nav-link.active {
+      color: var(--text); background: var(--surface2);
+    }
+    .nav-link.active { color: var(--accent); }
+    .connect-btn {
+      display: flex; align-items: center; gap: 8px;
+      padding: 10px 20px; border-radius: 10px;
+      font-family: var(--font-display); font-size: 0.875rem; font-weight: 700;
+      color: var(--bg); background: var(--accent);
+      border: none; cursor: pointer; transition: var(--transition);
+    }
+    .connect-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,220,180,0.35); }
+    .connect-btn.connected { background: var(--surface2); color: var(--accent); border: 1px solid var(--border); }
+    .wallet-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--success); }
+
+    /* ─── WRAPPER ────────────────────────────────────── */
+    .wrapper { position: relative; z-index: 1; }
+
+    /* ─── HERO ───────────────────────────────────────── */
+    #hero {
+      min-height: calc(100vh - 70px);
+      display: grid; place-items: center; text-align: center;
+      padding: 80px 24px;
+    }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 6px 16px; border-radius: 100px;
+      background: rgba(0,220,180,0.08); border: 1px solid rgba(0,220,180,0.2);
+      font-size: 0.78rem; font-weight: 600; color: var(--accent);
+      font-family: var(--font-mono); margin-bottom: 28px;
+      animation: fade-up 0.6s ease both;
+    }
+    .hero-title {
+      font-size: clamp(2.8rem, 6vw, 5.5rem);
+      font-weight: 800; line-height: 1.05; letter-spacing: -0.03em;
+      max-width: 900px; margin: 0 auto 24px;
+      animation: fade-up 0.6s 0.1s ease both;
+    }
+    .hero-title .gradient-text {
+      background: linear-gradient(135deg, var(--glow) 0%, var(--glow2) 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .hero-subtitle {
+      font-size: 1.15rem; color: var(--text-muted); max-width: 580px; margin: 0 auto 48px;
+      line-height: 1.7; animation: fade-up 0.6s 0.2s ease both;
+    }
+    .hero-cta {
+      display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;
+      animation: fade-up 0.6s 0.3s ease both;
+    }
+    .btn-primary {
+      padding: 14px 32px; border-radius: 12px;
+      background: var(--accent); color: var(--bg);
+      font-family: var(--font-display); font-size: 1rem; font-weight: 700;
+      border: none; cursor: pointer; transition: var(--transition);
+    }
+    .btn-primary:hover { transform: translateY(-3px); box-shadow: 0 12px 32px rgba(0,220,180,0.4); }
+    .btn-secondary {
+      padding: 14px 32px; border-radius: 12px;
+      background: transparent; color: var(--text);
+      font-family: var(--font-display); font-size: 1rem; font-weight: 600;
+      border: 1px solid var(--border); cursor: pointer; transition: var(--transition);
+    }
+    .btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* Stats bar */
+    .hero-stats {
+      display: flex; gap: 48px; justify-content: center; flex-wrap: wrap;
+      margin-top: 80px; animation: fade-up 0.6s 0.4s ease both;
+    }
+    .stat { text-align: center; }
+    .stat-value { font-size: 2rem; font-weight: 800; color: var(--accent); }
+    .stat-label { font-size: 0.8rem; color: var(--text-muted); font-family: var(--font-mono); margin-top: 4px; }
+
+    @keyframes fade-up {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ─── SECTIONS ───────────────────────────────────── */
+    section { padding: 100px 40px; max-width: 1200px; margin: 0 auto; }
+    .section-header { margin-bottom: 60px; }
+    .section-tag {
+      font-family: var(--font-mono); font-size: 0.75rem; font-weight: 500;
+      color: var(--accent); letter-spacing: 0.1em; text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+    .section-title { font-size: 2.2rem; font-weight: 800; letter-spacing: -0.02em; }
+
+    /* ─── FILTER BAR ─────────────────────────────────── */
+    .filter-bar {
+      display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 40px;
+    }
+    .filter-btn {
+      padding: 10px 20px; border-radius: 100px;
+      font-family: var(--font-display); font-size: 0.875rem; font-weight: 600;
+      color: var(--text-muted); background: var(--surface);
+      border: 1px solid var(--border); cursor: pointer; transition: var(--transition);
+      display: flex; align-items: center; gap: 6px;
+    }
+    .filter-btn:hover, .filter-btn.active {
+      color: var(--accent); border-color: var(--accent);
+      background: rgba(0,220,180,0.08);
+    }
+
+    /* ─── VEHICLE GRID ───────────────────────────────── */
+    .vehicle-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 24px; }
+
+    .vehicle-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      transition: var(--transition);
+      position: relative;
+    }
+    .vehicle-card:hover {
+      transform: translateY(-6px);
+      border-color: rgba(0,220,180,0.3);
+      box-shadow: 0 24px 60px rgba(0,0,0,0.4), 0 0 40px rgba(0,220,180,0.08);
+    }
+    .vehicle-image {
+      height: 200px; background: var(--surface2);
+      position: relative; overflow: hidden;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .vehicle-emoji { font-size: 80px; filter: drop-shadow(0 8px 24px rgba(0,0,0,0.5)); }
+    .vehicle-type-badge {
+      position: absolute; top: 12px; left: 12px;
+      padding: 4px 12px; border-radius: 100px;
+      font-size: 0.7rem; font-weight: 700; font-family: var(--font-mono);
+      text-transform: uppercase; letter-spacing: 0.05em;
+    }
+    .type-auto { background: rgba(59,130,246,0.2); color: #60a5fa; border: 1px solid rgba(59,130,246,0.3); }
+    .type-moto { background: rgba(255,107,53,0.2); color: #ff8c5a; border: 1px solid rgba(255,107,53,0.3); }
+    .type-bici { background: rgba(0,220,180,0.15); color: var(--accent); border: 1px solid rgba(0,220,180,0.25); }
+    .verified-badge {
+      position: absolute; top: 12px; right: 12px;
+      padding: 4px 10px; border-radius: 100px;
+      font-size: 0.7rem; font-weight: 700; font-family: var(--font-mono);
+      background: rgba(0,220,180,0.15); color: var(--accent); border: 1px solid rgba(0,220,180,0.25);
+    }
+
+    .card-body { padding: 20px; }
+    .card-name { font-size: 1.15rem; font-weight: 700; margin-bottom: 6px; }
+    .card-meta {
+      font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-muted);
+      display: flex; gap: 16px; margin-bottom: 16px;
+    }
+    .card-specs {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 20px;
+    }
+    .spec {
+      background: var(--bg2); border-radius: 8px; padding: 10px 12px;
+    }
+    .spec-label { font-size: 0.65rem; font-family: var(--font-mono); color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
+    .spec-value { font-size: 0.9rem; font-weight: 600; margin-top: 2px; }
+    .battery-bar {
+      height: 4px; border-radius: 2px; background: var(--surface2); margin-top: 6px;
+    }
+    .battery-fill { height: 100%; border-radius: 2px; background: var(--accent); }
+
+    .card-footer {
+      display: flex; align-items: center; justify-content: space-between;
+      padding-top: 16px; border-top: 1px solid var(--border);
+    }
+    .price-eth { font-size: 1.4rem; font-weight: 800; color: var(--accent); }
+    .price-usd { font-size: 0.75rem; color: var(--text-muted); font-family: var(--font-mono); }
+    .buy-btn {
+      padding: 10px 20px; border-radius: 10px;
+      background: var(--accent); color: var(--bg);
+      font-family: var(--font-display); font-size: 0.875rem; font-weight: 700;
+      border: none; cursor: pointer; transition: var(--transition);
+    }
+    .buy-btn:hover { transform: scale(1.05); box-shadow: 0 8px 24px rgba(0,220,180,0.35); }
+    .buy-btn:disabled { background: var(--surface2); color: var(--text-muted); cursor: not-allowed; transform: none; box-shadow: none; }
+
+    /* ─── SELL FORM ──────────────────────────────────── */
+    #sell { display: none; }
+    #sell.active { display: block; }
+
+    .form-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 20px; padding: 40px; max-width: 700px;
+    }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .form-group { display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px; }
+    .form-label {
+      font-size: 0.8rem; font-weight: 600; font-family: var(--font-mono);
+      color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em;
+    }
+    .form-input, .form-select {
+      padding: 12px 16px; border-radius: 10px;
+      background: var(--bg2); border: 1px solid var(--border);
+      color: var(--text); font-family: var(--font-display); font-size: 0.95rem;
+      transition: var(--transition); outline: none;
+    }
+    .form-input:focus, .form-select:focus {
+      border-color: var(--accent); box-shadow: 0 0 0 3px rgba(0,220,180,0.1);
+    }
+    .form-input::placeholder { color: var(--text-muted); }
+    .form-select option { background: var(--bg2); }
+
+    /* ─── HOW IT WORKS ───────────────────────────────── */
+    .steps-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 24px; }
+    .step-card {
+      background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 32px 28px; position: relative; overflow: hidden;
+    }
+    .step-card::before {
+      content: ''; position: absolute; inset: 0;
+      background: linear-gradient(135deg, rgba(0,220,180,0.04) 0%, transparent 60%);
+    }
+    .step-number {
+      font-size: 3.5rem; font-weight: 800; color: rgba(0,220,180,0.12);
+      font-family: var(--font-mono); line-height: 1; margin-bottom: 20px;
+    }
+    .step-icon { font-size: 2rem; margin-bottom: 16px; }
+    .step-title { font-size: 1.05rem; font-weight: 700; margin-bottom: 10px; }
+    .step-desc { font-size: 0.875rem; color: var(--text-muted); line-height: 1.6; }
+
+    /* ─── TX HISTORY ─────────────────────────────────── */
+    .tx-table {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); overflow: hidden;
+    }
+    .tx-row {
+      display: grid; grid-template-columns: 80px 2fr 1fr 1fr 1fr 120px;
+      padding: 16px 24px; align-items: center;
+      border-bottom: 1px solid var(--border); font-size: 0.875rem;
+      transition: var(--transition);
+    }
+    .tx-row:hover { background: var(--surface2); }
+    .tx-row.header { font-family: var(--font-mono); font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
+    .tx-status {
+      padding: 4px 12px; border-radius: 100px;
+      font-size: 0.7rem; font-weight: 700; font-family: var(--font-mono);
+      text-transform: uppercase; display: inline-block;
+    }
+    .status-completed { background: rgba(0,220,180,0.12); color: var(--accent); }
+    .status-pending { background: rgba(255,193,7,0.12); color: #ffc107; }
+    .hash-mono { font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-muted); }
+
+    /* ─── MODAL ──────────────────────────────────────── */
+    .modal-overlay {
+      display: none; position: fixed; inset: 0; z-index: 200;
+      background: rgba(5,8,16,0.85); backdrop-filter: blur(8px);
+      align-items: center; justify-content: center; padding: 24px;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 20px; padding: 40px; width: 100%; max-width: 520px;
+      animation: modal-in 0.3s ease;
+    }
+    @keyframes modal-in { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+    .modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 28px; }
+    .modal-title { font-size: 1.4rem; font-weight: 800; }
+    .modal-close {
+      width: 36px; height: 36px; border-radius: 8px;
+      background: var(--surface2); border: none; color: var(--text);
+      cursor: pointer; font-size: 1.2rem; display: grid; place-items: center;
+    }
+    .modal-vehicle-info {
+      background: var(--bg2); border-radius: 12px; padding: 20px; margin-bottom: 24px;
+    }
+    .modal-price { font-size: 2rem; font-weight: 800; color: var(--accent); }
+    .modal-fee-breakdown {
+      display: flex; flex-direction: column; gap: 10px; margin-bottom: 28px;
+    }
+    .fee-row {
+      display: flex; justify-content: space-between; align-items: center;
+      font-size: 0.875rem;
+    }
+    .fee-row.total { font-weight: 700; padding-top: 12px; border-top: 1px solid var(--border); }
+    .confirm-btn {
+      width: 100%; padding: 16px; border-radius: 12px;
+      background: var(--accent); color: var(--bg);
+      font-family: var(--font-display); font-size: 1rem; font-weight: 700;
+      border: none; cursor: pointer; transition: var(--transition);
+    }
+    .confirm-btn:hover { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(0,220,180,0.4); }
+
+    /* ─── TOAST ──────────────────────────────────────── */
+    .toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 300; display: flex; flex-direction: column; gap: 10px; }
+    .toast {
+      display: flex; align-items: center; gap: 12px;
+      padding: 14px 20px; border-radius: 12px; max-width: 360px;
+      background: var(--surface); border: 1px solid var(--border);
+      font-size: 0.875rem; box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+      animation: toast-in 0.3s ease;
+    }
+    .toast.success { border-color: rgba(0,220,180,0.3); }
+    .toast.error { border-color: rgba(255,77,109,0.3); }
+    @keyframes toast-in { from { opacity: 0; transform: translateX(40px); } to { opacity: 1; transform: translateX(0); } }
+
+    /* ─── FOOTER ─────────────────────────────────────── */
+    footer {
+      border-top: 1px solid var(--border); padding: 48px 40px;
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: gap; font-size: 0.85rem; color: var(--text-muted);
+      position: relative; z-index: 1;
+    }
+    .footer-links { display: flex; gap: 24px; }
+    .footer-link { color: var(--text-muted); text-decoration: none; transition: var(--transition); }
+    .footer-link:hover { color: var(--accent); }
+
+    /* ─── NETWORK BANNER ─────────────────────────────── */
+    .network-banner {
+      background: rgba(0,220,180,0.08); border-bottom: 1px solid rgba(0,220,180,0.15);
+      padding: 8px 40px; font-family: var(--font-mono); font-size: 0.75rem;
+      display: flex; gap: 24px; align-items: center; color: var(--text-muted);
+    }
+    .network-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); display: inline-block; margin-right: 6px; animation: pulse 2s ease infinite; }
+    @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.4;} }
+
+    /* ─── BLOCKCHAIN VISUALIZER ──────────────────────── */
+    .chain-vis {
+      display: flex; gap: 0; align-items: center; overflow-x: auto;
+      padding: 24px 0; margin-bottom: 40px;
+      scrollbar-width: thin; scrollbar-color: var(--border) transparent;
+    }
+    .block {
+      flex-shrink: 0; background: var(--surface); border: 1px solid var(--border);
+      border-radius: 10px; padding: 16px; width: 180px;
+      font-family: var(--font-mono); font-size: 0.7rem; color: var(--text-muted);
+    }
+    .block-hash { color: var(--accent); word-break: break-all; margin-top: 6px; }
+    .block-arrow {
+      flex-shrink: 0; width: 32px; text-align: center;
+      color: var(--text-muted); font-size: 1.2rem;
+    }
+
+    /* ─── RESPONSIVE ─────────────────────────────────── */
+    @media (max-width: 768px) {
+      nav { padding: 0 20px; }
+      .nav-links { display: none; }
+      section { padding: 60px 20px; }
+      .form-row { grid-template-columns: 1fr; }
+      .tx-row { grid-template-columns: 1fr 1fr; gap: 8px; }
+      .tx-row.header { display: none; }
+      footer { flex-direction: column; gap: 16px; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Background -->
+<div class="bg-grid"></div>
+<div class="bg-orb bg-orb-1"></div>
+<div class="bg-orb bg-orb-2"></div>
+
+<!-- Network Banner -->
+<div class="network-banner">
+  <span><span class="network-dot"></span>Ethereum Sepolia Testnet</span>
+  <span>Block: <span id="blockNumber">—</span></span>
+  <span>Gas: <span id="gasPrice">—</span> Gwei</span>
+  <span>ETH/USD: <span id="ethPrice">$3,241.50</span></span>
+</div>
+
+<!-- Nav -->
+<nav>
+  <div class="logo">
+    <div class="logo-icon">⚡</div>
+    Electro<span>Vault</span>
+  </div>
+  <div class="nav-links">
+    <button class="nav-link active" onclick="showSection('marketplace')">Marketplace</button>
+    <button class="nav-link" onclick="showSection('sell')">Vender</button>
+    <button class="nav-link" onclick="showSection('how')">Cómo funciona</button>
+    <button class="nav-link" onclick="showSection('history')">Historial</button>
+  </div>
+  <button class="connect-btn" id="connectBtn" onclick="connectWallet()">
+    🔗 Conectar Wallet
+  </button>
+</nav>
+
+<div class="wrapper">
+
+  <!-- ─── HERO ─── -->
+  <div id="hero">
+    <div>
+      <div class="hero-badge">⛓️ Powered by Ethereum Blockchain</div>
+      <h1 class="hero-title">
+        El futuro de la movilidad<br>
+        <span class="gradient-text">en la blockchain</span>
+      </h1>
+      <p class="hero-subtitle">
+        Compra y vende automóviles, motos y bicicletas eléctricas con criptomonedas.
+        Cada transacción es inmutable, transparente y segura gracias a smart contracts en Ethereum.
+      </p>
+      <div class="hero-cta">
+        <button class="btn-primary" onclick="showSection('marketplace')">Explorar vehículos →</button>
+        <button class="btn-secondary" onclick="showSection('how')">¿Cómo funciona?</button>
+      </div>
+      <div class="hero-stats">
+        <div class="stat"><div class="stat-value" id="statVehicles">0</div><div class="stat-label">Vehículos listados</div></div>
+        <div class="stat"><div class="stat-value" id="statTx">0</div><div class="stat-label">Transacciones</div></div>
+        <div class="stat"><div class="stat-value">2.5%</div><div class="stat-label">Fee de plataforma</div></div>
+        <div class="stat"><div class="stat-value">100%</div><div class="stat-label">On-chain</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── MARKETPLACE ─── -->
+  <section id="marketplace">
+    <div class="section-header">
+      <div class="section-tag">// marketplace</div>
+      <h2 class="section-title">Vehículos disponibles</h2>
+    </div>
+
+    <div class="filter-bar">
+      <button class="filter-btn active" onclick="filterVehicles('all', this)">🚗 Todos</button>
+      <button class="filter-btn" onclick="filterVehicles('auto', this)">🚗 Automóviles</button>
+      <button class="filter-btn" onclick="filterVehicles('moto', this)">🏍️ Motos</button>
+      <button class="filter-btn" onclick="filterVehicles('bici', this)">🚲 Bicicletas</button>
+      <button class="filter-btn" onclick="filterVehicles('verified', this)">✅ Verificados</button>
+    </div>
+
+    <div class="vehicle-grid" id="vehicleGrid">
+      <!-- Vehicles loaded dynamically -->
+    </div>
+  </section>
+
+  <!-- ─── SELL ─── -->
+  <section id="sell" style="display:none;">
+    <div class="section-header">
+      <div class="section-tag">// vender vehículo</div>
+      <h2 class="section-title">Publicar vehículo</h2>
+    </div>
+
+    <div class="form-card">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Tipo de vehículo</label>
+          <select class="form-select" id="vType" onchange="updateTypeEmoji()">
+            <option value="0">🚗 Automóvil eléctrico</option>
+            <option value="1">🏍️ Motocicleta eléctrica</option>
+            <option value="2">🚲 Bicicleta eléctrica</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Marca</label>
+          <input class="form-input" id="vBrand" type="text" placeholder="Tesla, BMW, Yamaha...">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Modelo</label>
+          <input class="form-input" id="vModel" type="text" placeholder="Model 3, CE 04...">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Año</label>
+          <input class="form-input" id="vYear" type="number" placeholder="2023" min="2000" max="2026">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">VIN (Nº de chasis)</label>
+          <input class="form-input" id="vVin" type="text" placeholder="5YJ3E1EA7NF123456">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Kilometraje</label>
+          <input class="form-input" id="vMileage" type="number" placeholder="15000">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Salud de batería (%)</label>
+          <input class="form-input" id="vBattery" type="text" placeholder="95%">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Precio (ETH)</label>
+          <input class="form-input" id="vPrice" type="number" placeholder="1.5" step="0.01" min="0.001">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">URI de metadatos (IPFS)</label>
+        <input class="form-input" id="vMeta" type="text" placeholder="ipfs://Qm...">
+      </div>
+      <button class="btn-primary" onclick="listVehicle()" style="width:100%; margin-top:8px;">
+        ⚡ Publicar en blockchain
+      </button>
+    </div>
+  </section>
+
+  <!-- ─── HOW IT WORKS ─── -->
+  <section id="how" style="display:none;">
+    <div class="section-header">
+      <div class="section-tag">// protocolo</div>
+      <h2 class="section-title">Cómo funciona</h2>
+    </div>
+
+    <!-- Blockchain visualizer -->
+    <div class="chain-vis" id="chainVis"></div>
+
+    <div class="steps-grid">
+      <div class="step-card">
+        <div class="step-number">01</div>
+        <div class="step-icon">🔗</div>
+        <div class="step-title">Conecta tu wallet</div>
+        <div class="step-desc">Usa MetaMask u otra wallet compatible con Ethereum. Asegúrate de estar en la red correcta (Sepolia testnet para pruebas).</div>
+      </div>
+      <div class="step-card">
+        <div class="step-number">02</div>
+        <div class="step-icon">🚗</div>
+        <div class="step-title">Explora o publica</div>
+        <div class="step-desc">Navega los vehículos disponibles o publica el tuyo. Todos los datos se almacenan directamente en el smart contract de Ethereum.</div>
+      </div>
+      <div class="step-card">
+        <div class="step-number">03</div>
+        <div class="step-icon">⛓️</div>
+        <div class="step-title">Smart Contract</div>
+        <div class="step-desc">Al comprar, tu ETH va al contrato inteligente. El contrato transfiere el 97.5% al vendedor y guarda el 2.5% como fee de plataforma.</div>
+      </div>
+      <div class="step-card">
+        <div class="step-number">04</div>
+        <div class="step-icon">✅</div>
+        <div class="step-title">Transferencia inmutable</div>
+        <div class="step-desc">La transacción queda registrada para siempre en la blockchain. El historial de propiedad del vehículo es transparente y verificable.</div>
+      </div>
+    </div>
+
+    <div style="margin-top:60px;">
+      <div class="section-tag" style="margin-bottom:16px;">// contrato inteligente</div>
+      <div class="form-card">
+        <div style="font-family: var(--font-mono); font-size: 0.8rem; color: var(--text-muted); line-height:1.8;">
+          <span style="color:var(--accent);">contract</span> <span style="color:#60a5fa;">ElectroVaultMarketplace</span> {<br>
+          &nbsp;&nbsp;<span style="color:var(--accent);">// Fee de plataforma: 2.5%</span><br>
+          &nbsp;&nbsp;uint256 <span style="color:#fbbf24;">platformFeePercent</span> = <span style="color:#f87171;">250</span>;<br><br>
+          &nbsp;&nbsp;<span style="color:var(--accent);">function</span> <span style="color:#60a5fa;">purchaseVehicle</span>(uint256 vehicleId) <span style="color:#a78bfa;">payable</span> {<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;<span style="color:var(--accent);">// Verificar pago suficiente</span><br>
+          &nbsp;&nbsp;&nbsp;&nbsp;require(msg.value &gt;= vehicle.price);<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;<span style="color:var(--accent);">// Calcular fee y monto al vendedor</span><br>
+          &nbsp;&nbsp;&nbsp;&nbsp;uint256 fee = (price * 250) / 10000;<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;seller.transfer(price - fee);<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;<span style="color:var(--accent);">// Emitir evento on-chain</span><br>
+          &nbsp;&nbsp;&nbsp;&nbsp;emit VehiclePurchased(id, buyer, seller);<br>
+          &nbsp;&nbsp;}<br>
+          }
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── HISTORY ─── -->
+  <section id="history" style="display:none;">
+    <div class="section-header">
+      <div class="section-tag">// historial on-chain</div>
+      <h2 class="section-title">Transacciones</h2>
+    </div>
+
+    <div class="tx-table">
+      <div class="tx-row header">
+        <span>TX #</span><span>Vehículo</span><span>Comprador</span><span>Monto (ETH)</span><span>Fecha</span><span>Estado</span>
+      </div>
+      <div id="txList">
+        <!-- populated by JS -->
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<!-- ─── PURCHASE MODAL ─── -->
+<div class="modal-overlay" id="purchaseModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Confirmar compra</div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-vehicle-info" id="modalVehicleInfo"></div>
+    <div class="modal-fee-breakdown">
+      <div class="fee-row"><span>Precio del vehículo</span><span id="mPrice">—</span></div>
+      <div class="fee-row"><span>Fee de plataforma (2.5%)</span><span id="mFee">—</span></div>
+      <div class="fee-row total"><span>Total a pagar</span><span id="mTotal">—</span></div>
+    </div>
+    <button class="confirm-btn" id="confirmBtn" onclick="confirmPurchase()">
+      ⚡ Confirmar con MetaMask
+    </button>
+  </div>
+</div>
+
+<!-- ─── TOAST CONTAINER ─── -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- ─── FOOTER ─── -->
+<footer>
+  <div class="logo" style="font-size:1rem;">
+    <div class="logo-icon" style="width:28px;height:28px;font-size:14px;">⚡</div>
+    Electro<span>Vault</span>
+  </div>
+  <div style="font-family:var(--font-mono);font-size:0.7rem;text-align:center;">
+    Smart Contract: <span style="color:var(--accent);" id="contractAddrFooter">0x0000...0000</span>
+  </div>
+  <div class="footer-links">
+    <a href="https://github.com/TU_USUARIO/electrovault" class="footer-link" target="_blank">GitHub</a>
+    <a href="#" class="footer-link">Etherscan</a>
+    <a href="#" class="footer-link">Docs</a>
+  </div>
+</footer>
+
+<!-- ─── SCRIPTS ─── -->
+<script>
+
+// ── CONTRACT CONFIG ──────────────────────────────────
+// Actualiza CONTRACT_ADDRESS con la dirección de tu contrato desplegado
+const CONTRACT_ADDRESS = "0x0000000000000000000000000000000000000000";
+const CONTRACT_ABI = [
+  "function listVehicle(string,string,uint256,string,string,uint256,uint8,uint256,string) returns(uint256)",
+  "function purchaseVehicle(uint256) payable",
+  "function getVehicle(uint256) view returns(tuple(uint256,address,string,string,uint256,string,string,uint256,uint8,uint8,uint256,uint256,uint256,string,bool))",
+  "function getTotalVehicles() view returns(uint256)",
+  "function getTotalTransactions() view returns(uint256)",
+  "function getActiveListings() view returns(uint256[])",
+  "function platformFeePercent() view returns(uint256)",
+  "event VehicleListed(uint256,address,uint8,uint256,string,string)",
+  "event VehiclePurchased(uint256,uint256,address,address,uint256)"
+];
+
+// ── DEMO DATA ─────────────────────────────────────────
+const DEMO_VEHICLES = [
+  { id:1, type:"auto", brand:"Tesla", model:"Model 3", year:2023, price:1.5, battery:95, mileage:15000, verified:true, seller:"0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B" },
+  { id:2, type:"moto", brand:"Energica", model:"Ego RS", year:2022, price:0.8, battery:88, mileage:8000, verified:true, seller:"0x742d35Cc6634C0532925a3b844Bc454e4438f44e" },
+  { id:3, type:"bici", brand:"VanMoof", model:"S5", year:2024, price:0.12, battery:100, mileage:500, verified:false, seller:"0x1aD91ee08f21bE3dE0BA2ba6918E714dA6B45836" },
+  { id:4, type:"auto", brand:"BMW", model:"i4 M50", year:2023, price:2.1, battery:91, mileage:22000, verified:true, seller:"0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B" },
+  { id:5, type:"moto", brand:"Zero", model:"SR/F", year:2023, price:0.65, battery:97, mileage:3200, verified:false, seller:"0x53d284357ec70cE289D6D64134DfAc8E511c8a3D" },
+  { id:6, type:"bici", brand:"Cowboy", model:"C4 ST", year:2024, price:0.08, battery:100, mileage:120, verified:true, seller:"0x6Fc5a3Eb5F517e93A3c3aD2d5dCc22bc21A31A1E" },
+];
+
+const DEMO_TXS = [
+  { id:"TX-001", vehicle:"Tesla Model 3", buyer:"0xAb58...eC9B", amount:1.5, date:"2024-03-15", status:"completed" },
+  { id:"TX-002", vehicle:"VanMoof S5", buyer:"0x742d...f44e", amount:0.12, date:"2024-03-14", status:"completed" },
+  { id:"TX-003", vehicle:"Zero SR/F", buyer:"0x1aD9...6836", amount:0.65, date:"2024-03-13", status:"pending" },
+];
+
+// ── STATE ─────────────────────────────────────────────
+let walletConnected = false;
+let currentAccount = null;
+let currentFilter = "all";
+let selectedVehicle = null;
+
+// ── WALLET ─────────────────────────────────────────────
+async function connectWallet() {
+  if (typeof window.ethereum === "undefined") {
+    showToast("⚠️ MetaMask no detectado. Instala MetaMask para continuar.", "error");
+    setTimeout(() => window.open("https://metamask.io/download/", "_blank"), 1500);
+    return;
+  }
+  try {
+    const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
+    currentAccount = accounts[0];
+    walletConnected = true;
+    const btn = document.getElementById("connectBtn");
+    btn.classList.add("connected");
+    btn.innerHTML = `<span class="wallet-dot"></span> ${currentAccount.slice(0,6)}...${currentAccount.slice(-4)}`;
+    showToast(`✅ Wallet conectada: ${currentAccount.slice(0,6)}...${currentAccount.slice(-4)}`, "success");
+    simulateBlockData();
+  } catch (e) {
+    showToast("❌ Conexión rechazada", "error");
+  }
+}
+
+// ── SECTIONS ──────────────────────────────────────────
+function showSection(name) {
+  document.getElementById("hero").style.display = name === "hero" ? "grid" : "none";
+  ["marketplace","sell","how","history"].forEach(s => {
+    document.getElementById(s).style.display = s === name ? "block" : "none";
+  });
+  document.querySelectorAll(".nav-link").forEach(l => l.classList.remove("active"));
+  const map = { marketplace:0, sell:1, how:2, history:3 };
+  if (map[name] !== undefined) document.querySelectorAll(".nav-link")[map[name]].classList.add("active");
+  if (name === "how") buildChainVis();
+  if (name === "history") buildTxList();
+}
+
+// ── VEHICLE GRID ───────────────────────────────────────
+function filterVehicles(type, btn) {
+  currentFilter = type;
+  document.querySelectorAll(".filter-btn").forEach(b => b.classList.remove("active"));
+  btn.classList.add("active");
+  buildVehicleGrid();
+}
+
+const EMOJIS = { auto: "🚗", moto: "🏍️", bici: "🚲" };
+const TYPE_LABELS = { auto: "Automóvil", moto: "Motocicleta", bici: "Bicicleta" };
+const TYPE_CLASSES = { auto: "type-auto", moto: "type-moto", bici: "type-bici" };
+const ETH_USD = 3241.50;
+
+function buildVehicleGrid() {
+  const grid = document.getElementById("vehicleGrid");
+  let filtered = DEMO_VEHICLES;
+  if (currentFilter !== "all") {
+    if (currentFilter === "verified") filtered = filtered.filter(v => v.verified);
+    else filtered = filtered.filter(v => v.type === currentFilter);
+  }
+  if (!filtered.length) { grid.innerHTML = `<p style="color:var(--text-muted);padding:40px 0;">No se encontraron vehículos.</p>`; return; }
+  grid.innerHTML = filtered.map(v => `
+    <div class="vehicle-card">
+      <div class="vehicle-image">
+        <div class="vehicle-emoji">${EMOJIS[v.type]}</div>
+        <span class="vehicle-type-badge ${TYPE_CLASSES[v.type]}">${TYPE_LABELS[v.type]}</span>
+        ${v.verified ? '<span class="verified-badge">✓ Verificado</span>' : ''}
+      </div>
+      <div class="card-body">
+        <div class="card-name">${v.brand} ${v.model}</div>
+        <div class="card-meta">
+          <span>${v.year}</span>
+          <span>${v.mileage.toLocaleString()} km</span>
+          <span>${v.seller.slice(0,8)}...</span>
+        </div>
+        <div class="card-specs">
+          <div class="spec">
+            <div class="spec-label">Batería</div>
+            <div class="spec-value">${v.battery}%</div>
+            <div class="battery-bar"><div class="battery-fill" style="width:${v.battery}%"></div></div>
+          </div>
+          <div class="spec">
+            <div class="spec-label">Estado</div>
+            <div class="spec-value" style="color:var(--accent)">✓ Disponible</div>
+          </div>
+        </div>
+        <div class="card-footer">
+          <div>
+            <div class="price-eth">${v.price} ETH</div>
+            <div class="price-usd">≈ $${(v.price * ETH_USD).toLocaleString("es-CO", {maximumFractionDigits:0})}</div>
+          </div>
+          <button class="buy-btn" onclick="openPurchaseModal(${v.id})"
+            ${!walletConnected ? 'title="Conecta tu wallet primero"' : ''}>
+            Comprar
+          </button>
+        </div>
+      </div>
+    </div>
+  `).join("");
+  document.getElementById("statVehicles").textContent = DEMO_VEHICLES.length;
+}
+
+// ── PURCHASE MODAL ─────────────────────────────────────
+function openPurchaseModal(vehicleId) {
+  if (!walletConnected) { showToast("🔗 Primero conecta tu wallet", "error"); return; }
+  selectedVehicle = DEMO_VEHICLES.find(v => v.id === vehicleId);
+  if (!selectedVehicle) return;
+  document.getElementById("modalVehicleInfo").innerHTML = `
+    <div style="display:flex;gap:16px;align-items:center;">
+      <span style="font-size:3rem;">${EMOJIS[selectedVehicle.type]}</span>
+      <div>
+        <div style="font-weight:700;font-size:1.1rem;">${selectedVehicle.brand} ${selectedVehicle.model}</div>
+        <div style="font-size:0.8rem;color:var(--text-muted);font-family:var(--font-mono);">${selectedVehicle.year} · ${selectedVehicle.mileage.toLocaleString()} km · Batería ${selectedVehicle.battery}%</div>
+      </div>
+    </div>
+  `;
+  const fee = selectedVehicle.price * 0.025;
+  document.getElementById("mPrice").textContent = `${selectedVehicle.price} ETH`;
+  document.getElementById("mFee").textContent = `${fee.toFixed(4)} ETH`;
+  document.getElementById("mTotal").textContent = `${selectedVehicle.price} ETH`;
+  document.getElementById("purchaseModal").classList.add("open");
+}
+
+function closeModal() { document.getElementById("purchaseModal").classList.remove("open"); }
+
+async function confirmPurchase() {
+  if (!selectedVehicle) return;
+  const btn = document.getElementById("confirmBtn");
+  btn.textContent = "⏳ Procesando en blockchain...";
+  btn.disabled = true;
+
+  // Simular envío a blockchain (reemplazar con llamada real al contrato)
+  await new Promise(r => setTimeout(r, 2500));
+
+  closeModal();
+  showToast(`🎉 ¡Compra exitosa! ${selectedVehicle.brand} ${selectedVehicle.model} es tuyo`, "success");
+  btn.textContent = "⚡ Confirmar con MetaMask";
+  btn.disabled = false;
+
+  // Simular actualización de stats
+  document.getElementById("statTx").textContent = parseInt(document.getElementById("statTx").textContent || 0) + 1;
+
+  // Agregar TX al historial
+  DEMO_TXS.unshift({
+    id: `TX-${String(DEMO_TXS.length + 1).padStart(3,"0")}`,
+    vehicle: `${selectedVehicle.brand} ${selectedVehicle.model}`,
+    buyer: currentAccount ? `${currentAccount.slice(0,6)}...${currentAccount.slice(-4)}` : "0x...",
+    amount: selectedVehicle.price,
+    date: new Date().toISOString().slice(0,10),
+    status: "completed"
+  });
+}
+
+// ── LIST VEHICLE ───────────────────────────────────────
+async function listVehicle() {
+  if (!walletConnected) { showToast("🔗 Conecta tu wallet primero", "error"); return; }
+  const brand = document.getElementById("vBrand").value.trim();
+  const model = document.getElementById("vModel").value.trim();
+  const price = document.getElementById("vPrice").value;
+  if (!brand || !model || !price) { showToast("⚠️ Completa todos los campos requeridos", "error"); return; }
+
+  showToast("⏳ Enviando transacción a la blockchain...", "success");
+  await new Promise(r => setTimeout(r, 2000));
+
+  const type = parseInt(document.getElementById("vType").value);
+  const types = ["auto","moto","bici"];
+  DEMO_VEHICLES.push({
+    id: DEMO_VEHICLES.length + 1,
+    type: types[type],
+    brand, model,
+    year: parseInt(document.getElementById("vYear").value) || 2024,
+    price: parseFloat(price),
+    battery: parseInt(document.getElementById("vBattery").value) || 100,
+    mileage: parseInt(document.getElementById("vMileage").value) || 0,
+    verified: false,
+    seller: currentAccount || "0x0000...0000"
+  });
+
+  showToast(`✅ ${brand} ${model} publicado en la blockchain!`, "success");
+  document.getElementById("statVehicles").textContent = DEMO_VEHICLES.length;
+
+  // Limpiar formulario
+  ["vBrand","vModel","vYear","vVin","vMileage","vBattery","vPrice","vMeta"].forEach(id => document.getElementById(id).value = "");
+  showSection("marketplace");
+}
+
+// ── TX LIST ─────────────────────────────────────────────
+function buildTxList() {
+  document.getElementById("statTx").textContent = DEMO_TXS.length;
+  const list = document.getElementById("txList");
+  list.innerHTML = DEMO_TXS.map(tx => `
+    <div class="tx-row">
+      <span class="hash-mono">${tx.id}</span>
+      <span style="font-weight:600;">${tx.vehicle}</span>
+      <span class="hash-mono">${tx.buyer}</span>
+      <span style="color:var(--accent);font-weight:700;">${tx.amount} ETH</span>
+      <span class="hash-mono">${tx.date}</span>
+      <span class="tx-status ${tx.status === "completed" ? "status-completed" : "status-pending"}">
+        ${tx.status === "completed" ? "Completada" : "Pendiente"}
+      </span>
+    </div>
+  `).join("");
+}
+
+// ── BLOCKCHAIN VISUALIZER ──────────────────────────────
+function buildChainVis() {
+  const vis = document.getElementById("chainVis");
+  const blocks = [
+    { num:18420001, hash:"0x4f3c...a91e", txs:3, time:"12s ago" },
+    { num:18420002, hash:"0x7b2d...f33c", txs:5, time:"24s ago" },
+    { num:18420003, hash:"0x1e9a...8d4b", txs:2, time:"36s ago" },
+    { num:18420004, hash:"0xa7c5...2f1d", txs:7, time:"now" },
+  ];
+  vis.innerHTML = blocks.map((b,i) => `
+    ${i > 0 ? '<div class="block-arrow">→</div>' : ''}
+    <div class="block">
+      <div style="color:var(--text-muted)">Block #${b.num}</div>
+      <div class="block-hash">${b.hash}</div>
+      <div style="margin-top:8px;">${b.txs} txns · ${b.time}</div>
+    </div>
+  `).join("");
+}
+
+// ── BLOCK DATA SIMULATION ──────────────────────────────
+function simulateBlockData() {
+  let block = 18420001;
+  setInterval(() => {
+    block++;
+    document.getElementById("blockNumber").textContent = block.toLocaleString();
+    document.getElementById("gasPrice").textContent = (Math.random() * 20 + 15).toFixed(1);
+  }, 12000);
+  document.getElementById("blockNumber").textContent = block.toLocaleString();
+  document.getElementById("gasPrice").textContent = "18.4";
+}
+
+// ── CONTRACT ADDRESS ───────────────────────────────────
+document.getElementById("contractAddrFooter").textContent =
+  CONTRACT_ADDRESS !== "0x0000000000000000000000000000000000000000"
+    ? `${CONTRACT_ADDRESS.slice(0,6)}...${CONTRACT_ADDRESS.slice(-4)}`
+    : "No desplegado";
+
+// ── TOAST ──────────────────────────────────────────────
+function showToast(msg, type = "success") {
+  const tc = document.getElementById("toastContainer");
+  const el = document.createElement("div");
+  el.className = `toast ${type}`;
+  el.innerHTML = `<span>${msg}</span>`;
+  tc.appendChild(el);
+  setTimeout(() => el.remove(), 4000);
+}
+
+// ── INIT ────────────────────────────────────────────────
+document.addEventListener("DOMContentLoaded", () => {
+  buildVehicleGrid();
+  document.getElementById("statTx").textContent = DEMO_TXS.length;
+  // Auto-connect if already connected
+  if (typeof window.ethereum !== "undefined") {
+    window.ethereum.request({ method: "eth_accounts" }).then(accounts => {
+      if (accounts.length > 0) {
+        currentAccount = accounts[0];
+        walletConnected = true;
+        const btn = document.getElementById("connectBtn");
+        btn.classList.add("connected");
+        btn.innerHTML = `<span class="wallet-dot"></span> ${currentAccount.slice(0,6)}...${currentAccount.slice(-4)}`;
+        simulateBlockData();
+      }
+    });
+  }
+});
+
+</script>
+</body>
+</html>
