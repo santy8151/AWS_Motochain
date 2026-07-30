@@ -1,190 +1,379 @@
-# ⚡ ElectroVault — Blockchain Marketplace de Vehículos Eléctricos
+# ⚡ ElectroVault
+## Blockchain Marketplace para Vehículos Eléctricos sobre AWS
 
-> Compra y vende automóviles, motos y bicicletas eléctricas con criptomonedas en Ethereum.  
-> Smart contracts en Solidity · Frontend web · Deploy en AWS S3
+ElectroVault es una plataforma moderna para la compra y venta de vehículos eléctricos utilizando tecnología blockchain sobre Ethereum.
 
-![Deploy](https://img.shields.io/github/actions/workflow/status/TU_USUARIO/electrovault/deploy.yml?label=AWS%20Deploy)
-![Solidity](https://img.shields.io/badge/Solidity-0.8.20-blue?logo=solidity)
-![Ethereum](https://img.shields.io/badge/Ethereum-Sepolia-purple?logo=ethereum)
-![License](https://img.shields.io/badge/License-MIT-green)
+El proyecto fue diseñado con una arquitectura escalable basada en **Onion Architecture**, preparada para ejecutarse mediante **Docker** y desplegarse en **Amazon Web Services (AWS)**.
+
+El objetivo principal es demostrar conocimientos en:
+
+- ☁️ AWS Cloud Practitioner
+- 🔗 Blockchain (Solidity + Ethereum)
+- 🐳 Docker
+- ⚡ FastAPI
+- 🏗️ Arquitectura Onion
+- 🔒 Seguridad Web3
+- 🚀 CI/CD con GitHub Actions
 
 ---
 
-## 🏗️ Arquitectura
+# 🚀 Tecnologías
+
+## Backend
+
+- FastAPI
+- Python 3.12
+- SQLAlchemy
+- JWT Authentication
+- Onion Architecture
+
+## Blockchain
+
+- Solidity
+- Hardhat
+- Ethers.js
+- OpenZeppelin
+- MetaMask
+
+## Frontend
+
+- HTML5
+- CSS3
+- JavaScript
+- Web3.js
+
+## DevOps
+
+- Docker
+- Docker Compose
+- GitHub Actions
+- Nginx
+
+## AWS
+
+- Amazon EC2
+- Amazon ECS
+- Amazon S3
+- Amazon IAM
+- Amazon CloudWatch
+- Amazon ECR
+- Amazon CloudFront
+- AWS Secrets Manager
+- AWS Parameter Store
+
+---
+
+# 🏛 Arquitectura
 
 ```
-electrovault/
-├── contracts/
-│   └── ElectroVaultMarketplace.sol    ← Smart contract principal (Solidity)
-├── scripts/
-│   ├── deploy.js                      ← Script de despliegue a Ethereum
-│   └── aws-deploy.sh                  ← Script de deploy a AWS S3
-├── test/
-│   └── ElectroVaultMarketplace.test.js ← Tests con Hardhat + Chai
-├── frontend/
-│   └── index.html                     ← Web app (Vanilla JS + Web3)
-├── .github/
-│   └── workflows/
-│       └── deploy.yml                 ← CI/CD: GitHub Actions → AWS S3
-├── hardhat.config.js
-├── package.json
-└── .env.example
+AWS-MotoChain/
+
+backend/
+│
+├── src/
+│   ├── Domain/
+│   ├── Application/
+│   ├── Infrastructure/
+│   └── Presentation/
+│
+├── modules/
+│   ├── auth/
+│   ├── users/
+│   ├── profiles/
+│   ├── menu/
+│   ├── purchases/
+│   ├── stock/
+│   ├── sales/
+│   ├── scraper/
+│   └── blockchain/
+│
+├── Dockerfile
+└── docker-compose.yml
+
+frontend/
+
+smart-contracts/
+
+aws/
+
+docs/
+
+.github/
+```
+
+La aplicación implementa **Onion Architecture**, separando completamente:
+
+- Dominio
+- Casos de uso
+- Infraestructura
+- Presentación
+
+permitiendo desacoplamiento, escalabilidad y facilidad para realizar pruebas.
+
+---
+
+# 📦 Módulos
+
+El backend está dividido en módulos independientes.
+
+```
+Auth
+
+Gestión de Usuarios
+
+Perfiles
+
+Inventario
+
+Compras
+
+Ventas
+
+Menús
+
+Blockchain
+
+Scraper
+
+Dashboard
+```
+
+Cada módulo contiene:
+
+```
+controllers/
+
+services/
+
+repositories/
+
+schemas/
+
+models/
+
+validators/
+
+routes/
 ```
 
 ---
 
-## ✨ Funcionalidades del Smart Contract
+# 🔗 Blockchain
 
-| Función | Descripción |
-|---|---|
-| `listVehicle()` | Publica un vehículo eléctrico con precio en ETH |
-| `purchaseVehicle()` | Compra un vehículo — transfiere ETH al vendedor |
-| `updatePrice()` | El vendedor puede actualizar el precio |
-| `removeVehicle()` | Retirar un vehículo del marketplace |
-| `verifyVehicle()` | Admin puede marcar vehículos como verificados |
-| `setPlatformFee()` | Admin ajusta la comisión (máx. 10%) |
-| `withdrawFees()` | Admin retira comisiones acumuladas |
+El sistema incorpora contratos inteligentes desarrollados en Solidity para administrar el marketplace.
 
-**Eventos on-chain:** `VehicleListed`, `VehiclePurchased`, `PriceUpdated`, `VehicleVerified`
+## Funcionalidades
+
+✅ Publicar vehículos
+
+✅ Comprar con ETH
+
+✅ Historial de propietarios
+
+✅ Registro de mantenimientos
+
+✅ Vehículos verificados
+
+✅ Comisión configurable
+
+✅ Protección Reentrancy
 
 ---
 
-## 🚀 Instalación rápida
+# ⛽ Optimización de Gas
 
-### 1. Clonar el repositorio
+Los contratos fueron diseñados siguiendo buenas prácticas para minimizar costos:
+
+- uso de eventos
+- almacenamiento mínimo
+- structs optimizados
+- validaciones tempranas
+- OpenZeppelin Security
+
+---
+
+# ☁ Arquitectura AWS
+
+El proyecto está preparado para desplegarse sobre AWS.
+
+```
+Internet
+
+↓
+
+CloudFront
+
+↓
+
+Amazon S3
+(Frontend)
+
+↓
+
+Application Load Balancer
+
+↓
+
+Amazon ECS
+
+↓
+
+FastAPI
+
+↓
+
+Amazon RDS
+
+↓
+
+Smart Contract Ethereum
+```
+
+Servicios contemplados:
+
+- Amazon ECS
+- Amazon EC2
+- Amazon S3
+- Amazon ECR
+- IAM
+- CloudWatch
+- Secrets Manager
+- CloudFront
+
+---
+
+# 🐳 Docker
+
+El proyecto incluye:
+
+- Dockerfile
+- docker-compose
+- Variables de entorno
+- Healthcheck
+- Multi-stage Build
+
+Ejecutar:
+
 ```bash
-git clone https://github.com/TU_USUARIO/electrovault.git
-cd electrovault
-npm install
-```
-
-### 2. Configurar variables de entorno
-```bash
-cp .env.example .env
-# Edita .env con tus claves
-```
-
-### 3. Compilar y probar el contrato
-```bash
-npm run compile    # Compila el contrato Solidity
-npm test           # Ejecuta los tests
-```
-
-### 4. Desplegar localmente
-```bash
-# Terminal 1: levantar nodo local
-npm run node
-
-# Terminal 2: desplegar contrato
-npm run deploy:local
-```
-
-### 5. Abrir el frontend
-```bash
-# Simplemente abre en tu navegador:
-open frontend/index.html
+docker compose up --build
 ```
 
 ---
 
-## 🌐 Deploy a Ethereum (Testnet)
+# ⚡ FastAPI
 
-### Prerequisitos
-1. Crea una cuenta en [Alchemy](https://alchemy.com) y obtén una API key
-2. Consigue ETH de testnet en [Sepolia Faucet](https://sepoliafaucet.com)
-3. Exporta la clave privada de tu wallet de desarrollo (¡NUNCA uses tu wallet principal!)
+Se implementó un microservicio independiente para consulta de precios de motocicletas.
 
-```bash
-# Desplegar a Sepolia testnet
-npm run deploy:sepolia
+Ejemplo:
 
-# Verificar el contrato en Etherscan
-npx hardhat verify --network sepolia DIRECCION_DEL_CONTRATO
+```
+GET /prices/yamaha
+
+GET /prices/honda
+
+GET /prices/suzuki
+```
+
+El servicio consulta información pública de mercado (respetando los términos de uso de cada sitio) y permite acceder directamente a publicaciones relacionadas mediante un botón con enlace a Mercado Libre.
+
+---
+
+# 🔒 Autenticación
+
+JWT Authentication
+
+Roles:
+
+- Administrador
+- Comprador
+- Vendedor
+
+---
+
+# 🚀 CI/CD
+
+GitHub Actions automatiza:
+
+✔ Build
+
+✔ Tests
+
+✔ Docker Build
+
+✔ Deploy AWS
+
+---
+
+# 📁 Documentación
+
+```
+docs/
+
+architecture.md
+
+deployment.md
+
+aws.md
+
+api.md
+
+security.md
 ```
 
 ---
 
-## ☁️ Deploy a AWS S3
-
-### Opción A: Script manual
-```bash
-# Configura tus credenciales de AWS
-aws configure
-
-# Ejecutar deploy
-bash scripts/aws-deploy.sh
-```
-
-### Opción B: GitHub Actions (automático)
-Configura estos **secrets** en tu repositorio de GitHub:  
-`Settings → Secrets and variables → Actions`
-
-| Secret | Descripción |
-|---|---|
-| `AWS_ACCESS_KEY_ID` | Clave de acceso de IAM user |
-| `AWS_SECRET_ACCESS_KEY` | Clave secreta de IAM user |
-| `CLOUDFRONT_DISTRIBUTION_ID` | (Opcional) Para invalidar caché CDN |
-| `DEPLOYER_PRIVATE_KEY` | Clave privada para deploy del contrato |
-| `SEPOLIA_RPC_URL` | URL de Alchemy/Infura para Sepolia |
-| `ETHERSCAN_API_KEY` | Para verificación del contrato |
-
-Cada push a `main` dispara automáticamente el deploy a S3. 🎉
-
----
-
-## 🔧 Integrar MetaMask con el contrato desplegado
-
-Después del deploy, actualiza `CONTRACT_ADDRESS` en `frontend/index.html`:
-
-```javascript
-// frontend/index.html línea ~430
-const CONTRACT_ADDRESS = "0xTU_DIRECCION_DEL_CONTRATO";
-```
-
----
-
-## 🧪 Tests
+# 🧪 Testing
 
 ```bash
-npm test                  # Todos los tests
-npm run test:coverage     # Reporte de cobertura
+npm test
+
+pytest
+
+coverage
 ```
 
-El contrato incluye tests para:
-- ✅ Despliegue correcto
-- ✅ Publicar vehículos con validaciones
-- ✅ Compra con transferencia de fondos
-- ✅ Cálculo correcto de fees
-- ✅ Devolución de exceso de ETH
-- ✅ Control de acceso (solo vendedor, solo owner)
-- ✅ Prevención de reentrancy
+Incluye pruebas para:
+
+- Smart Contracts
+- API
+- Servicios
+- Repositorios
 
 ---
 
-## 📋 Redes soportadas
+# 🔮 Roadmap
 
-| Red | Uso | Chain ID |
-|---|---|---|
-| Localhost (Hardhat) | Desarrollo | 31337 |
-| Ethereum Sepolia | Testing | 11155111 |
-| Polygon Mumbai | Testing (gas barato) | 80001 |
-| Ethereum Mainnet | Producción | 1 |
-
----
-
-## 🔐 Seguridad
-
-- **ReentrancyGuard** — Protección contra ataques de reentrada
-- **Ownable** — Control de acceso para funciones de admin
-- **Checks-Effects-Interactions** — Patrón seguro para transferencias
-- **Input validation** — Validación estricta de todos los parámetros
+- [x] Marketplace Blockchain
+- [x] Docker
+- [x] Onion Architecture
+- [x] FastAPI
+- [x] AWS Ready
+- [ ] Terraform
+- [ ] Amazon Cognito
+- [ ] Amazon API Gateway
+- [ ] AWS Lambda
+- [ ] Kubernetes (EKS)
+- [ ] Monitoreo con Prometheus y Grafana
 
 ---
 
-## 📄 Licencia
+# 📄 Licencia
 
-MIT © ElectroVault
+MIT License
 
 ---
 
-> **⚠️ Disclaimer:** Este proyecto es educativo. Para producción, se recomienda una auditoría de seguridad del smart contract.
+# 👨‍💻 Autor
+
+Desarrollado como proyecto académico y de portafolio para demostrar competencias en:
+
+- AWS Cloud Practitioner
+- Blockchain
+- Backend Development
+- Cloud Computing
+- DevOps
+- Arquitectura de Software
+
+---
+
+> **Nota:** Este proyecto tiene fines educativos y de demostración. Las integraciones con AWS y Ethereum están preparadas para facilitar un despliegue real, pero requieren configurar credenciales, infraestructura y recursos antes de usarse en producción.
