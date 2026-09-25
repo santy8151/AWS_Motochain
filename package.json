@@ -1,0 +1,31 @@
+{
+  "name": "electrovault-marketplace",
+  "version": "1.0.0",
+  "description": "Blockchain marketplace para vehículos eléctricos — Ethereum Smart Contracts + Frontend Web",
+  "main": "index.js",
+  "scripts": {
+    "compile": "npx hardhat compile",
+    "test": "npx hardhat test",
+    "test:coverage": "npx hardhat coverage",
+    "node": "npx hardhat node",
+    "deploy:local": "npx hardhat run scripts/deploy.js --network localhost",
+    "deploy:sepolia": "npx hardhat run scripts/deploy.js --network sepolia",
+    "deploy:mainnet": "npx hardhat run scripts/deploy.js --network mainnet",
+    "verify": "npx hardhat verify --network sepolia",
+    "frontend:dev": "cd frontend && npm run dev",
+    "frontend:build": "cd frontend && npm run build",
+    "lint": "npx solhint 'contracts/**/*.sol'"
+  },
+  "keywords": ["blockchain", "ethereum", "solidity", "nft", "defi", "vehicles", "crypto"],
+  "author": "ElectroVault Team",
+  "license": "MIT",
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^4.0.0",
+    "hardhat": "^2.19.0",
+    "solhint": "^4.1.1"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "^5.0.0",
+    "dotenv": "^16.3.1"
+  }
+}

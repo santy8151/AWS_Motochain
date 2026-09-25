@@ -1,0 +1,96 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  @apply bg-ssscaner-darker text-white font-sans;
+  overflow-x: hidden;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-ssscaner-dark;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-ssscaner-primary rounded-full;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-ssscaner-accent;
+}
+
+.gradient-primary {
+  @apply bg-gradient-to-r from-ssscaner-primary to-ssscaner-accent;
+}
+
+.gradient-secondary {
+  @apply bg-gradient-to-r from-ssscaner-secondary to-ssscaner-danger;
+}
+
+.card {
+  @apply bg-ssscaner-dark border border-ssscaner-primary/20 rounded-lg p-4 hover:border-ssscaner-primary/50 transition-all;
+}
+
+.btn-primary {
+  @apply px-4 py-2 bg-ssscaner-primary text-ssscaner-darker rounded-lg font-semibold hover:bg-ssscaner-accent transition-all;
+}
+
+.btn-secondary {
+  @apply px-4 py-2 bg-ssscaner-secondary text-white rounded-lg font-semibold hover:bg-ssscaner-danger transition-all;
+}
+
+.btn-ghost {
+  @apply px-4 py-2 border border-ssscaner-primary/50 text-ssscaner-primary rounded-lg font-semibold hover:bg-ssscaner-primary/10 transition-all;
+}
+
+.metric-box {
+  @apply bg-gradient-to-br from-ssscaner-primary/20 to-ssscaner-accent/20 border border-ssscaner-primary/30 rounded-lg p-6 backdrop-blur-sm;
+}
+
+.input-field {
+  @apply w-full px-4 py-2 bg-ssscaner-dark border border-ssscaner-primary/30 rounded-lg text-white focus:outline-none focus:border-ssscaner-primary transition-all;
+}
+
+.input-field::placeholder {
+  @apply text-ssscaner-primary/50;
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 5px rgba(0, 212, 255, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(0, 212, 255, 0.8);
+  }
+}
+
+.status-ok {
+  @apply text-ssscaner-success font-bold;
+}
+
+.status-warning {
+  @apply text-ssscaner-warning font-bold;
+}
+
+.status-critical {
+  @apply text-ssscaner-danger font-bold animate-pulse;
+}

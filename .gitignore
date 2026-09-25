@@ -1,0 +1,35 @@
+# Dependencies
+node_modules/
+frontend/node_modules/
+
+# Environment variables — NUNCA subir al repo
+.env
+.env.local
+.env.production
+
+# Hardhat build artifacts
+artifacts/
+cache/
+coverage/
+coverage.json
+
+# Frontend build
+frontend/dist/
+frontend/build/
+
+# Logs
+*.log
+npm-debug.log*
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Contract deployment info (contiene ABI — opcional subirlo si lo deseas compartir)
+# frontend/src/contract-info.json

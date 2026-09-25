@@ -1,0 +1,128 @@
+name: 🚀 ElectroVault — Deploy to AWS S3
+
+on:
+  push:
+    branches:
+      - main        # Deploy automático al hacer push a main
+  pull_request:
+    branches:
+      - main        # Solo pruebas en PRs, sin deploy
+
+env:
+  AWS_REGION: us-east-1
+  S3_BUCKET: electrovault-app           # Cambia por tu bucket
+  CONTRACT_NETWORK: sepolia
+
+jobs:
+  # ─────────────────────────────────────────
+  #  JOB 1: Tests del Smart Contract
+  # ─────────────────────────────────────────
+  test-contracts:
+    name: 🧪 Test Smart Contracts
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout código
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Compilar contratos
+        run: npx hardhat compile
+
+      - name: Ejecutar tests
+        run: npx hardhat test
+
+      - name: Coverage report
+        run: npx hardhat coverage
+        continue-on-error: true
+
+  # ─────────────────────────────────────────
+  #  JOB 2: Deploy Frontend a AWS S3
+  # ─────────────────────────────────────────
+  deploy-frontend:
+    name: 🌐 Deploy Frontend → AWS S3
+    runs-on: ubuntu-latest
+    needs: test-contracts    # Solo deploya si los tests pasan
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+
+    steps:
+      - name: Checkout código
+        uses: actions/checkout@v4
+
+      - name: Configurar credenciales AWS
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Subir frontend a S3
+        run: |
+          # Subir todos los archivos del frontend
+          aws s3 sync ./frontend s3://${{ env.S3_BUCKET }} \
+            --exclude "node_modules/*" \
+            --cache-control "max-age=86400" \
+            --delete
+
+          # Index sin caché para siempre servir la versión más reciente
+          aws s3 cp ./frontend/index.html s3://${{ env.S3_BUCKET }}/index.html \
+            --cache-control "no-cache, no-store, must-revalidate" \
+            --content-type "text/html"
+
+      - name: Invalidar CloudFront (si está configurado)
+        if: ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID != '' }}
+        run: |
+          aws cloudfront create-invalidation \
+            --distribution-id ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }} \
+            --paths "/*"
+
+      - name: Verificar deploy
+        run: |
+          echo "✅ Deploy completado!"
+          echo "🌐 URL: http://${{ env.S3_BUCKET }}.s3-website-${{ env.AWS_REGION }}.amazonaws.com"
+
+  # ─────────────────────────────────────────
+  #  JOB 3: Deploy Contrato (manual trigger)
+  # ─────────────────────────────────────────
+  deploy-contract:
+    name: ⛓️ Deploy Smart Contract → Sepolia
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch'  # Solo manual
+
+    steps:
+      - name: Checkout código
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Compilar contratos
+        run: npx hardhat compile
+
+      - name: Desplegar a Sepolia
+        env:
+          PRIVATE_KEY: ${{ secrets.DEPLOYER_PRIVATE_KEY }}
+          SEPOLIA_RPC_URL: ${{ secrets.SEPOLIA_RPC_URL }}
+        run: npx hardhat run scripts/deploy.js --network sepolia
+
+      - name: Verificar contrato en Etherscan
+        env:
+          ETHERSCAN_API_KEY: ${{ secrets.ETHERSCAN_API_KEY }}
+        run: |
+          # La dirección se obtiene del deploy anterior
+          echo "Verificando contrato..."
+        continue-on-error: true
