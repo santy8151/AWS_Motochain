@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react'
-import { MessageCircle, Zap, Activity, Wrench, Gauge, AlertTriangle, BarChart3, Cpu, LogOut, Menu, X, Car, ShieldCheck, BatteryCharging } from 'lucide-react'
+import { MessageCircle, Zap, Activity, Wrench, Gauge, AlertTriangle, BarChart3, Cpu, LogOut, Menu, X, Car, ShieldCheck, BatteryCharging, ShoppingBag } from 'lucide-react'
 import { useAppStore } from '../store/appStore'
 import { useAuthStore } from '../store/authStore'
 import Sidebar from '../components/Sidebar'
@@ -7,6 +7,7 @@ import AIChat from '../components/AIChat'
 import ScannerPanel from '../components/ScannerPanel'
 import BetaTools from '../components/BetaTools'
 import DiagnosticPanel from '../components/DiagnosticPanel'
+import Marketplace from '../components/Marketplace'
 import '../styles/Dashboard.css'
 
 export default function Dashboard() {
@@ -17,6 +18,7 @@ export default function Dashboard() {
   const pages = useMemo(() => ([
     { id: 'dashboard', label: 'Resumen', icon: Activity, locked: !chatUnlocked },
     { id: 'ai-chat', label: 'IA Chat', icon: MessageCircle, locked: false },
+    { id: 'marketplace', label: 'Marketplace EV', icon: ShoppingBag, locked: false },
     { id: 'scanner', label: 'Scanner EV', icon: Zap, locked: !chatUnlocked },
     { id: 'beta', label: 'Espacio Beta', icon: Cpu, locked: false },
     { id: 'frequency', label: 'Frecuencia', icon: Gauge, locked: !chatUnlocked },
@@ -69,6 +71,7 @@ export default function Dashboard() {
         <div className="page-container">
           {currentPage === 'dashboard' && <DashboardPage />}
           {currentPage === 'ai-chat' && <AIChat />}
+          {currentPage === 'marketplace' && <Marketplace />}
           {currentPage === 'scanner' && <ScannerPanel />}
           {currentPage === 'beta' && <BetaTools />}
           {currentPage === 'diagnostics' && <DiagnosticPanel />}

@@ -44,7 +44,10 @@ export default function Sidebar({ pages, currentPage, setCurrentPage, onLogout, 
                   <div className="nav-item-text">
                     <span className="nav-item-label">{page.label}</span>
                     <span className="nav-item-desc">
-                      {page.locked ? 'Bloqueado' : page.id === 'ai-chat' ? 'Chat inteligente con IA' : 'Zona beta disponible'}
+                      {page.locked ? 'Bloqueado'
+                        : page.id === 'ai-chat' ? 'Chat inteligente con IA'
+                        : page.id === 'marketplace' ? 'Compra vehículos EV'
+                        : 'Zona beta disponible'}
                     </span>
                   </div>
                 </div>
